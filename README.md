@@ -7,8 +7,8 @@
 This Java Example is an example project to showcase the usage of white-box fuzz testing for developers.
 It features examples for the usage as security issue detector as well as robustness issue detector.
 
-The project contains multiple examples (**Links will only work in the respective branches!**):
-* [SpringBoot Examples](src/test/java/com/demo/api/SpringBootServerTests.java):
+The project contains multiple examples:
+* [SpringBoot Examples](src/test/java/com/demo/api/):
 Multiple examples ranging from simple to more complex showcasing the testing of APIs.
 * [Library Testing Examples](src/test/java/com/demo/libraries):
 Two examples showing how to use fuzz testing to cover the holes in unit testing setups.
