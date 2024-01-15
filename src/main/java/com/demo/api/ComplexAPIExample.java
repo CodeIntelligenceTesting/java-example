@@ -16,45 +16,36 @@
 
 package com.demo.api;
 
-import com.demo.api.helper.MockLdapContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
-
-import javax.naming.directory.DirContext;
-import javax.naming.directory.SearchControls;
 import java.util.Base64;
 
 
 @RestController
 public class ComplexAPIExample {
-  private final DirContext ctx = new MockLdapContext();
-
   /**
    * Endpoint vulnerable if base64 encoded id of user id equals "YWRtaW46",
    * numberString XORed with 1000110 equals 1111111111 and the message causes an LDAP vulnerability
    * @param id
    * @param numberString
-   * @param message
+   * @param className
    * @return
    */
   @GetMapping("/complex")
   public String insecureComplexExample(@RequestParam String id,
                                        @RequestParam String numberString,
-                                       @RequestParam String message) {
+                                       @RequestParam String className) {
     Base64.Encoder base64 = Base64.getEncoder();
 
-    // We guard the LDAP vulnerability by checking if the base64 encoded id equals "YWRtaW46"
-    // and the numberString XORed with 1000110 equals 1111111111.
+    // We guard the remote code execution vulnerability by checking if the base64 encoded id equals "YWRtaW46"
+    // and the numberString XORed with 1000110 equals 111111111.
     // This displays CI Fuzz's ability to detect the checks made and generate a test case
-    // triggering passing the checks and triggering the RCE.
+    // passing the checks and triggering the RCE.
     // Black-box approaches lack insights into the code and thus cannot handle these cases.
 
     if (base64.encodeToString(id.getBytes()).equals("YWRtaW46")) {
       try {
         if ((Integer.valueOf(numberString) ^ 1000110) == 111111111) {
-          String base = "ou=" + message + ",dc=example,dc=com";
-          ctx.search(base, "(&(uid=foo)(cn=bar))", new SearchControls());
+          Class.forName(className).getConstructor().newInstance();
         }
       } catch (Exception ignored) {
         // We don't need to handle the exception

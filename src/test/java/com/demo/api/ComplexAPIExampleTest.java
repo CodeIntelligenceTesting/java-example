@@ -37,7 +37,7 @@ public class ComplexAPIExampleTest {
     mockMvc.perform(get("/complex")
             .param("id", "Some ID")
             .param("numberString", "1100")
-            .param("message", "Some message"));
+            .param("className", "Some message"));
   }
 
   /**
@@ -51,6 +51,6 @@ public class ComplexAPIExampleTest {
     mockMvc.perform(get("/complex")
             .param("id", data.consumeString(10))
             .param("numberString", String.valueOf(data.consumeInt()))
-            .param("message", data.consumeRemainingAsString()));
+            .param("className", data.consumeRemainingAsString()));
   }
 }

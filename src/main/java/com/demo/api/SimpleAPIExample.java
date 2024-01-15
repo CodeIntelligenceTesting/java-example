@@ -16,51 +16,53 @@
 
 package com.demo.api;
 
-import com.demo.api.helper.SQLInjectionHelper;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.h2.jdbcx.JdbcDataSource;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @RestController
 public class SimpleAPIExample {
+  private Connection conn;
 
   public static class User {
-    public int a;
-    public int b;
-    public String name;
+    public String username;
+    public String password;
+    public String queryValue;
   }
 
   public SimpleAPIExample() throws SQLException{
-    SQLInjectionHelper.connect();
+    this.connect();
   }
 
 
   /**
    * Insecure /hello endpoint function that is vulnerable to SQL injection attacks
    * when params a and b match the checks.
-   * @param name
+   * @param queryValue
    * @return
    */
   @GetMapping("/simple")
-  public String insecureSimpleExample(@RequestParam(required = true) String a,
-                                      @RequestParam(required = true) String b,
-                                      @RequestParam(required = false, defaultValue = "World") String name) {
+  public String insecureSimpleExample(@RequestParam(required = true) String username,
+                                      @RequestParam(required = true) String password,
+                                      @RequestParam(required = false, defaultValue = "World") String queryValue) {
     // We trigger a SQL injection vulnerability.
     // This shows how CI Fuzz can detect the guarding checks
     // and generates a test case triggering the vulnerability.
     // Black-box approaches lack insights into the code and thus cannot handle these cases.
-    if (a.equals("20000") ) {
-      if (b.equals("2000000")) {
+    if (username.equals("admin") ) {
+      if (password.equals("123456789")) {
           try {
-            SQLInjectionHelper.insecureDBRequest(name);
+            String query = String.format("SELECT * FROM users WHERE username='%s'", queryValue);
+            ResultSet rs = conn.createStatement().executeQuery(query);
           } catch (Exception ignored) {
             // We don't need to handle the exception
           }
       }
     }
-    return "Hello " + name + "!";
+    return "Hello " + username + "!";
   }
 
   /**
@@ -75,15 +77,31 @@ public class SimpleAPIExample {
     // This shows how CI Fuzz can detect the guarding checks
     // and generates a test case triggering the vulnerability.
     // Black-box approaches lack insights into the code and thus cannot handle these cases.
-    if (user.a >= 20000) {
-      if (user.b >= 2000000) {
-          try {
-            SQLInjectionHelper.insecureDBRequest(user.name);
-          } catch (Exception ignored) {
-            // We don't need to handle the exception
-          }
+    if (user.username.equals("admin") ) {
+      if (user.password.equals("123456789")) {
+        try {
+          String query = String.format("SELECT * FROM users WHERE username='%s'", user.queryValue);
+          ResultSet rs = conn.createStatement().executeQuery(query);
+        } catch (Exception ignored) {
+          // We don't need to handle the exception
+        }
       }
     }
-    return "Hello " + user.name + "!";
+    return "Hello " + user.queryValue + "!";
+  }
+
+  /**
+   * Helper function that connects to an in-memory db and inserts dummy data
+   * @throws SQLException
+   */
+  private void connect() throws SQLException{
+    JdbcDataSource ds = new JdbcDataSource();
+    ds.setURL("jdbc:h2:mem:database.db");
+    conn = ds.getConnection();
+
+    // A dummy database is dynamically created
+    conn.createStatement().execute("CREATE TABLE IF NOT EXISTS users (id IDENTITY PRIMARY KEY, username VARCHAR(50), name VARCHAR(50), password VARCHAR(50))");
+    conn.createStatement().execute("INSERT INTO users (username, name, password) VALUES ('admin', 'Administrator', 'passw0rd')");
+    conn.createStatement().execute("INSERT INTO users (username, name, password) VALUES ('john', ' John', 'hello123')");
   }
 }
