@@ -38,17 +38,17 @@ public class SimpleAPIExampleTest {
   @Test
   public void unitTestHelloDeveloper() throws Exception {
     mockMvc.perform(get("/simple")
-            .param("a", "0")
-            .param("b", "10")
-            .param("name", "Developer"));
+            .param("username", "Developer")
+            .param("password", "102312")
+            .param("queryValue", "Developer"));
   }
 
   @Test
   public void unitTestMaintainer() throws Exception {
     mockMvc.perform(get("/simple")
-            .param("a", "20")
-            .param("b", "-10")
-            .param("name", "Maintainer"));
+            .param("username", "Maintainer")
+            .param("password", "-adad12")
+            .param("queryValue", "Maintainer"));
   }
 
   /**
@@ -59,9 +59,9 @@ public class SimpleAPIExampleTest {
   @FuzzTest
   public void fuzzTestSimpleExample(FuzzedDataProvider data) throws Exception {
     mockMvc.perform(get("/simple")
-            .param("a", data.consumeString(10))
-            .param("b", data.consumeString(10))
-            .param("name", data.consumeRemainingAsString()));
+            .param("username", data.consumeString(10))
+            .param("password", data.consumeString(10))
+            .param("queryValue", data.consumeRemainingAsString()));
   }
 
 
@@ -69,9 +69,9 @@ public class SimpleAPIExampleTest {
   public void unitTestJsonDeveloper() throws Exception {
     ObjectMapper om = new ObjectMapper();
     SimpleAPIExample.User user = new SimpleAPIExample.User();
-    user.a = 0;
-    user.b = 10;
-    user.name = "Developer";
+    user.username = "Developer";
+    user.password = "1adada2332";
+    user.queryValue = "Developer";
     mockMvc.perform(post("/json").content(om.writeValueAsString(user)).contentType(MediaType.APPLICATION_JSON));
   }
 
@@ -85,9 +85,9 @@ public class SimpleAPIExampleTest {
   public void fuzzTestJsonExample(FuzzedDataProvider data) throws Exception {
     ObjectMapper om = new ObjectMapper();
     SimpleAPIExample.User user = new SimpleAPIExample.User();
-    user.a = data.consumeInt();
-    user.b = data.consumeInt();
-    user.name = data.consumeRemainingAsString();
+    user.username = data.consumeString(10);
+    user.password = data.consumeString(10);
+    user.queryValue = data.consumeRemainingAsString();
     mockMvc.perform(post("/json").content(om.writeValueAsString(user)).contentType(MediaType.APPLICATION_JSON));
   }
 }
