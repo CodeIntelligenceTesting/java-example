@@ -39,9 +39,9 @@ jobs:
         with:
           path: ${{ env.CHECKOUT_DIR }}
       # Uncomment to configure access to CI Fuzz maven repository.
-      # - uses: s4u/maven-settings-action@v2.8.0
-      #   with:
-      #     servers: '[{"id": "code-intelligence", "username": "${{ secrets.MAVEN_REGISTRY_USERNAME }}", "password": "${{ secrets.MAVEN_REGISTRY_PASSWORD }}"}]'
+      - uses: s4u/maven-settings-action@v2.8.0
+        with:
+           servers: '[{"id": "code-intelligence", "username": "${{ secrets.MAVEN_REGISTRY_USERNAME }}", "password": "${{ secrets.MAVEN_REGISTRY_PASSWORD }}"}]'
       - id: install-cifuzz
         name: Install cifuzz
         uses: CodeIntelligenceTesting/github-actions/install-cifuzz@v6
