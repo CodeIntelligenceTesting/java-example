@@ -17,6 +17,7 @@
 package com.demo.api;
 
 import org.h2.jdbcx.JdbcDataSource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Connection;
@@ -27,9 +28,13 @@ import java.sql.SQLException;
 public class SimpleAPIExample {
   private Connection conn;
 
+  @NotNull
   public static class User {
+    @NotNull
     public String username;
+    @NotNull
     public String password;
+    @NotNull
     public String queryValue;
   }
 

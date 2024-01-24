@@ -16,24 +16,36 @@
 
 package com.demo.api;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 import java.util.Base64;
 
 
 @RestController
 public class ComplexAPIExample {
+
   /**
-   * Endpoint vulnerable if base64 encoded id of user id equals "YWRtaW46",
-   * numberString XORed with 1000110 equals 1111111111 and the message causes an LDAP vulnerability
-   * @param id
-   * @param numberString
-   * @param className
+   * Helper class used as json mapping target
+   */
+  @NotNull
+  public static class ImportantInformation {
+    @NotNull
+    public String id;
+
+    public int checkNumber;
+    @NotNull
+    public String className;
+  }
+  /**
+   * Endpoint vulnerable if base64 encoded id equals "YWRtaW46" and
+   * checkNumber XORed with 1000110 equals 1111111111.
+   * Attempts to load a class with the name specified in the className json param.
+   * @param importantInformation
    * @return
    */
-  @GetMapping("/complex")
-  public String insecureComplexExample(@RequestParam String id,
-                                       @RequestParam String numberString,
-                                       @RequestParam String className) {
+  @PostMapping("/complex")
+  public String insecureComplexBase64Example(@RequestBody ImportantInformation importantInformation) {
     Base64.Encoder base64 = Base64.getEncoder();
 
     // We guard the remote code execution vulnerability by checking if the base64 encoded id equals "YWRtaW46"
@@ -42,16 +54,16 @@ public class ComplexAPIExample {
     // passing the checks and triggering the RCE.
     // Black-box approaches lack insights into the code and thus cannot handle these cases.
 
-    if (base64.encodeToString(id.getBytes()).equals("YWRtaW46")) {
+    if (base64.encodeToString(importantInformation.id.getBytes()).equals("YWRtaW46")) {
       try {
-        if ((Integer.valueOf(numberString) ^ 1000110) == 111111111) {
-          Class.forName(className).getConstructor().newInstance();
+        if ((importantInformation.checkNumber ^ 1000110) == 111111111) {
+          Class.forName(importantInformation.className).getConstructor().newInstance();
         }
       } catch (Exception ignored) {
         // We don't need to handle the exception
       }
 
     }
-    return "Hello user " + id + "!";
+    return "Hello user " + importantInformation.id + "!";
   }
 }

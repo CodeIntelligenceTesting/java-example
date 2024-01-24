@@ -18,39 +18,60 @@ package com.demo.api;
 
 import com.code_intelligence.jazzer.api.FuzzedDataProvider;
 import com.code_intelligence.jazzer.junit.FuzzTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
 public class ComplexAPIExampleTest {
   @Autowired private MockMvc mockMvc;
 
+  /**
+   * Unit test for {@link ComplexAPIExample#insecureComplexBase64Example(ComplexAPIExample.ImportantInformation)}
+   * @throws Exception
+   */
   @Test
   public void unitTestBase64() throws Exception {
-    mockMvc.perform(get("/complex")
-            .param("id", "Some ID")
-            .param("numberString", "1100")
-            .param("className", "Some message"));
+    //Creating JSON mapping object
+    ObjectMapper om = new ObjectMapper();
+    ComplexAPIExample.ImportantInformation importantInformation = new ComplexAPIExample.ImportantInformation();
+    importantInformation.id = "Developer";
+    importantInformation.checkNumber = 12332;
+    importantInformation.className = "String";
+
+    // executing request
+    mockMvc.perform(post("/complex")
+            .content(om.writeValueAsString(importantInformation))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is2xxSuccessful());
   }
 
   /**
-   * Simple fuzz test for complex checks guarding the vulnerabilities
+   * Simple fuzz test for {@link ComplexAPIExample#insecureComplexBase64Example(ComplexAPIExample.ImportantInformation)}
    * Letting the fuzzer detect the correct inputs itself
-   * @param data
+   * @param importantInformation
    * @throws Exception
    */
   @FuzzTest
-  public void fuzzTestBase64(FuzzedDataProvider data) throws Exception {
-    mockMvc.perform(get("/complex")
-            .param("id", data.consumeString(10))
-            .param("numberString", String.valueOf(data.consumeInt()))
-            .param("className", data.consumeRemainingAsString()));
+  public void fuzzTestInsecureJsonExample(ComplexAPIExample.ImportantInformation importantInformation) throws Exception {
+    ObjectMapper om = new ObjectMapper();
+
+    if (importantInformation == null || importantInformation.id == null || importantInformation.className == null) {
+      return;
+    }
+
+    mockMvc.perform(post("/complex")
+            .content(om.writeValueAsString(importantInformation))
+            .contentType(MediaType.APPLICATION_JSON));
   }
 }

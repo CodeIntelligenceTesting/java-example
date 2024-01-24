@@ -29,65 +29,86 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE)
 public class SimpleAPIExampleTest {
   @Autowired private MockMvc mockMvc;
 
+  /**
+   * Unit Test for {@link SimpleAPIExample#insecureSimpleExample}
+   * @throws Exception
+   */
   @Test
-  public void unitTestHelloDeveloper() throws Exception {
+  public void unitTestInsecureSimpleExampleDeveloper() throws Exception {
     mockMvc.perform(get("/simple")
             .param("username", "Developer")
             .param("password", "102312")
-            .param("queryValue", "Developer"));
-  }
-
-  @Test
-  public void unitTestMaintainer() throws Exception {
-    mockMvc.perform(get("/simple")
-            .param("username", "Maintainer")
-            .param("password", "-adad12")
-            .param("queryValue", "Maintainer"));
+            .param("queryValue", "Developer"))
+            .andExpect(status().is2xxSuccessful());
   }
 
   /**
-   * Simple fuzz test to trigger a simple guarded vulnerability
+   * Unit Test for {@link SimpleAPIExample#insecureSimpleExample}
+   * @throws Exception
+   */
+  @Test
+  public void unitTestInsecureSimpleExampleMaintainer() throws Exception {
+    mockMvc.perform(get("/simple")
+            .param("username", "Maintainer")
+            .param("password", "-adad12")
+            .param("queryValue", "Maintainer"))
+            .andExpect(status().is2xxSuccessful());
+  }
+
+  /**
+   * Simple fuzz test for {@link SimpleAPIExample#insecureSimpleExample}
    * @param data
    * @throws Exception
    */
   @FuzzTest
-  public void fuzzTestSimpleExample(FuzzedDataProvider data) throws Exception {
+  public void fuzzTestInsecureSimpleExample(FuzzedDataProvider data) throws Exception {
     mockMvc.perform(get("/simple")
             .param("username", data.consumeString(10))
             .param("password", data.consumeString(10))
-            .param("queryValue", data.consumeRemainingAsString()));
+            .param("queryValue", data.consumeRemainingAsString()))
+            .andExpect(status().is2xxSuccessful());
   }
 
-
+  /**
+   * Unit Test for {@link SimpleAPIExample#insecureJsonExample(SimpleAPIExample.User)}
+   * @throws Exception
+   */
   @Test
-  public void unitTestJsonDeveloper() throws Exception {
+  public void unitTestInsecureJsonExampleDeveloper() throws Exception {
     ObjectMapper om = new ObjectMapper();
     SimpleAPIExample.User user = new SimpleAPIExample.User();
     user.username = "Developer";
     user.password = "1adada2332";
     user.queryValue = "Developer";
-    mockMvc.perform(post("/json").content(om.writeValueAsString(user)).contentType(MediaType.APPLICATION_JSON));
+    mockMvc.perform(post("/json")
+            .content(om.writeValueAsString(user))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is2xxSuccessful());
   }
 
   /**
-   * Simple fuzz test to trigger a simple guarded vulnerability.
+   * Simple fuzz test for {@link SimpleAPIExample#insecureJsonExample(SimpleAPIExample.User)}
    * This time a JSON object is expected as input.
-   * @param data
+   * @param user
    * @throws Exception
    */
   @FuzzTest
-  public void fuzzTestJsonExample(FuzzedDataProvider data) throws Exception {
+  public void fuzzTestInsecureJsonExample(SimpleAPIExample.User user) throws Exception {
     ObjectMapper om = new ObjectMapper();
-    SimpleAPIExample.User user = new SimpleAPIExample.User();
-    user.username = data.consumeString(10);
-    user.password = data.consumeString(10);
-    user.queryValue = data.consumeRemainingAsString();
-    mockMvc.perform(post("/json").content(om.writeValueAsString(user)).contentType(MediaType.APPLICATION_JSON));
+
+    if (user == null || user.username == null || user.password == null || user.queryValue == null) {
+      return;
+    }
+    mockMvc.perform(post("/json")
+            .content(om.writeValueAsString(user))
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is2xxSuccessful());
   }
 }
