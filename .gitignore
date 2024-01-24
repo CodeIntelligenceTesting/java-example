@@ -41,3 +41,4 @@ Crash*
 **/src/test/resources/**/*Inputs*/**
 fuzz_tests
 fuzz_tests.tar.gz
+**/*.tar.gz
