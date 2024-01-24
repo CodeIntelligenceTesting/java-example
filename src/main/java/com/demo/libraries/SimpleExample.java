@@ -19,7 +19,8 @@ public class SimpleExample {
             if (b >= 2000000) {
                 if (b - a < 100000) {
                     if (c.equals("Attacker")) {
-                        throw new SecurityException();
+                        // "fixed" security issue
+                        //throw new SecurityException();
                     }
                 }
             }
