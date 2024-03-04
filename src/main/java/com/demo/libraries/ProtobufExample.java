@@ -43,9 +43,6 @@ public class ProtobufExample {
             }
         }
 
-        // If there is no bug in our code, we should have a lucky number now
-        assert luckyNumber != 0;
-
         return luckyNumber;
     }
 }

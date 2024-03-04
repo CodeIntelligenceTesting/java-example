@@ -14,7 +14,6 @@ public class Rectangle {
 
     public long calculateArea() {
         long area = (long) Math.abs(this.x2 - this.x1) * (long) Math.abs(this.y2 - this.y1);
-        assert area >= 0;
         return area;
     }
 }

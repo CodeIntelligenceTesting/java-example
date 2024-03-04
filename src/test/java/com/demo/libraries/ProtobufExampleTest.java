@@ -58,7 +58,9 @@ public class ProtobufExampleTest {
         // Since we're not interested in those errors, we can
         // simply catch and ignore them here.
         try {
-            ProtobufExample.calculateLuckyNumber(calc);
+            int luckyNumber = ProtobufExample.calculateLuckyNumber(calc);
+            // If there is no bug in our code, we should have a lucky number now
+            assert luckyNumber != 0;
         } catch(IllegalArgumentException ex) {}
     }
 }

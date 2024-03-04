@@ -38,6 +38,7 @@ public class ProtobufRectangleTest {
                                        proto_rect.getX2(),
                                        proto_rect.getY1(),
                                        proto_rect.getY2());
-        rect.calculateArea();
+        long area = rect.calculateArea();
+        assert area >= 0;
     }
 }
